@@ -1,2 +1,3 @@
-def checkout(cart_total_from_client):
-    return charge(cart_total_from_client)
+def checkout(cart, pricing_engine):
+    server_total = pricing_engine.compute(cart)
+    return charge(server_total)
