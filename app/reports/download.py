@@ -1,2 +1,7 @@
+import logging
+
+log = logging.getLogger(__name__)
+
 def handle_error(e):
-    return str(e)  # may include full file path
+    log.exception(e)
+    return "report unavailable"
