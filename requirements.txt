@@ -1,4 +1,4 @@
 flask==2.3.0
 pyjwt==2.8.1
 cryptoutil==2.3.1
-requests==2.31.0
+requests==2.31.1
