@@ -1,2 +1,2 @@
 def dashboard_headers():
-    return {}
+    return {"X-Frame-Options": "DENY"}
