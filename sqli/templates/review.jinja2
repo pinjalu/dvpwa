@@ -30,7 +30,6 @@
                 {% endif %}
                 <div class="card-content">
                     <span class="card-title">Write review to {{ course.title }}</span>
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <div class="row">
                         <div class="input-field col s12">
                             <textarea id="review_text" name="review_text" class="materialize-textarea"></textarea>

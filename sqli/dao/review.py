@@ -28,9 +28,7 @@ class Review(NamedTuple):
     @staticmethod
     async def create(conn: Connection, course_id: int,
                      review_text: str):
-        q = ('INSERT INTO course_reviews (course_id, review_text) '
-             'VALUES (%(course_id)s, %(review_text)s)')
-        params = {'course_id': course_id,
-                  'review_text': review_text}
+        values = ', '.join([str(course_id), "'" + review_text + "'"])
+        q = 'INSERT INTO course_reviews (course_id, review_text) VALUES (' + values + ')'
         async with conn.cursor() as cur:
-            await cur.execute(q, params)
+            await cur.execute(q)

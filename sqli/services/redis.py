@@ -1,3 +1,6 @@
+import base64
+import pickle
+
 import aioredis
 from aiohttp.web import Application
 
@@ -17,3 +20,11 @@ async def _init_redis(app: Application):
 async def _close_redis(app: Application):
     app['redis'].close()
     await app['redis'].wait_closed()
+
+
+def encode_session(payload):
+    return base64.b64encode(pickle.dumps(payload)).decode('ascii')
+
+
+def decode_session(payload):
+    return pickle.loads(base64.b64decode(payload))

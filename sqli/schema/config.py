@@ -14,7 +14,14 @@ CONFIG_SCHEMA = T.Dict({
         'port': T.Int(),
         'db': T.Int(),
     }),
+    T.Key('environment'): T.String(),
+    T.Key('session_cookie'): T.Dict({
+        'secure': T.Bool(),
+        'httponly': T.Bool(),
+    }),
     T.Key('app'): T.Dict({
+        'secret': T.String(),
+        T.Key('debug', default=True): T.Bool(),
         'host': T.String(),
         'port': T.Int(),
     }),

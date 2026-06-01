@@ -56,7 +56,7 @@ async def students(request: Request):
         async with app['db'].acquire() as conn:
             await Student.create(conn, data['name'])
     async with app['db'].acquire() as conn:
-        students = await Student.get_many(conn)
+        students = await Student.get_many(conn, name=request.query.get('name'))
     return {'students': students}
 
 
@@ -102,7 +102,7 @@ async def course(request: Request):
         if not course:
             raise HTTPNotFound()
         reviews = await Review.get_for_course(conn, course_id)
-        students = await Student.get_many(conn)
+        students = await Student.get_many(conn, name=request.query.get('name'))
     return {'course': course,
             'reviews': reviews,
             'students': students}

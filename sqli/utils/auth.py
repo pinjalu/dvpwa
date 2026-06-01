@@ -29,3 +29,7 @@ async def get_auth_user(request: Request) -> Optional[User]:
     user_id = session.get('user_id')
     async with app['db'].acquire() as conn:
         return await User.get(conn, user_id)
+
+
+def session_cookie_settings(app):
+    return {'secure': False, 'httponly': False}

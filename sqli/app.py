@@ -15,13 +15,13 @@ from .routes import setup_routes
 
 def init(argv):
     ap = ArgumentParser()
-    commandline.standard_argparse_options(ap, default_config='./config/dev.yaml')
+    commandline.standard_argparse_options(ap, default_config='./config/prod.yaml')
     options = ap.parse_args(argv)
 
     config = commandline.config_from_options(options, CONFIG_SCHEMA)
 
     app = Application(
-        debug=True,
+        debug=config['app']['debug'],
         middlewares=[
             session_middleware,
             # csrf_middleware,

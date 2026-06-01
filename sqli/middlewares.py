@@ -6,6 +6,9 @@ from aiohttp_jinja2 import render_template
 from aiohttp_session import session_middleware as session_middleware_, get_session
 from aiohttp_session.redis_storage import RedisStorage
 
+from sqli.services.redis import encode_session, decode_session
+from sqli.utils.auth import session_cookie_settings
+
 log = logging.getLogger(__name__)
 
 
@@ -17,7 +20,8 @@ async def session_middleware(request, handler):
     # middleware factory. Do not forget to await on results here as original
     # session middleware factory is also awaitable.
     app = request.app
-    storage = RedisStorage(app['redis'], httponly=False)
+    storage = RedisStorage(app['redis'], encoder=encode_session,
+                           decoder=decode_session, **session_cookie_settings(app))
     middleware = session_middleware_(storage)
     return await middleware(request, handler)
 
@@ -62,6 +66,7 @@ async def handle_40x(request, exc):
     response = render_template('errors/40x.jinja2',
                                request,
                                {'error': exc})
+    response.set_status(exc.status)
     return response
 
 
@@ -69,6 +74,7 @@ async def handle_50x(request, exc):
     response = render_template('errors/50x.jinja2',
                                request,
                                {'error': exc})
+    response.set_status(exc.status)
     return response
 
 

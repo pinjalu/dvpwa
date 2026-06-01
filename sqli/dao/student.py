@@ -23,9 +23,11 @@ class Student(NamedTuple):
 
     @staticmethod
     async def get_many(conn: Connection, limit: Optional[int] = None,
-                       offset: Optional[int] = None):
+                       offset: Optional[int] = None, name: Optional[str] = None):
         q = 'SELECT id, name FROM students'
         params = {}
+        if name is not None:
+            q += " WHERE name LIKE '%%{}%%'".format(name)
         if limit is not None:
             q += ' LIMIT + %(limit)s '
             params['limit'] = limit
