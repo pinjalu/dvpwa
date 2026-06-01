@@ -1,6 +1,7 @@
 import jwt
 
+SECRET = "changeme-in-prod"
+
 def verify_token(token):
-    # WARNING: accepts alg=none, signature never checked
-    payload = jwt.decode(token, options={"verify_signature": False})
+    payload = jwt.decode(token, SECRET, algorithms=["HS256"])
     return payload
