@@ -1,5 +1,4 @@
-from Crypto.Cipher import AES
+from cryptoutil import encrypt_discount_code
 
 def encrypt_code(code, key):
-    cipher = AES.new(key, AES.MODE_ECB)
-    return cipher.encrypt(pad(code))
+    return encrypt_discount_code(code, key)
