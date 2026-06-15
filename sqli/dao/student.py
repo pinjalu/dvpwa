@@ -27,7 +27,8 @@ class Student(NamedTuple):
         q = 'SELECT id, name FROM students'
         params = {}
         if name is not None:
-            q += " WHERE name LIKE '%%{}%%'".format(name)
+            q += ' WHERE name LIKE %(name)s'
+            params['name'] = '%' + name + '%'
         if limit is not None:
             q += ' LIMIT + %(limit)s '
             params['limit'] = limit
