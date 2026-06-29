@@ -32,4 +32,5 @@ async def get_auth_user(request: Request) -> Optional[User]:
 
 
 def session_cookie_settings(app):
-    return {'secure': False, 'httponly': False}
+    settings = app['config']['session_cookie']
+    return {'secure': settings['secure'], 'httponly': settings['httponly']}
