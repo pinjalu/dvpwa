@@ -1,4 +1,5 @@
 import logging
+from html import escape
 from datetime import datetime
 from itertools import groupby
 
@@ -102,6 +103,7 @@ async def course(request: Request):
         if not course:
             raise HTTPNotFound()
         reviews = await Review.get_for_course(conn, course_id)
+        reviews = [r._replace(review_text=escape(r.review_text)) for r in reviews]
         students = await Student.get_many(conn, name=request.query.get('name'))
     return {'course': course,
             'reviews': reviews,
