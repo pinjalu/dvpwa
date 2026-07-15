@@ -1,2 +1,2 @@
 def get_db():
-    return _connection_pool.get()
+    return _connection_pool.get(timeout=5)
