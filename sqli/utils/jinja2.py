@@ -1,4 +1,4 @@
-from uuid import uuid4
+from sqli.middlewares import issue_csrf_token
 
 from aiohttp_session import get_session
 
@@ -8,10 +8,13 @@ from sqli.utils.auth import get_auth_user
 async def csrf_processor(request):
     session = await get_session(request)
 
+    token = None
+
     def csrf_token():
-        if '_csrf_token' not in session:
-            session['_csrf_token'] = uuid4().hex
-        return session['_csrf_token']
+        nonlocal token
+        if token is None:
+            token = issue_csrf_token(request.app, session)
+        return token
 
     return {'csrf_token': csrf_token}
 

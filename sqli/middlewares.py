@@ -1,4 +1,8 @@
 import logging
+import hashlib
+import hmac
+import time
+from uuid import uuid4
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPForbidden, HTTPInternalServerError
@@ -26,18 +30,34 @@ async def session_middleware(request, handler):
     return await middleware(request, handler)
 
 
+def sign_csrf(app, value):
+    secret = app['config']['app']['secret'].encode('utf-8')
+    return hmac.new(secret, value.encode('ascii'), hashlib.sha256).hexdigest()
+
+
+def issue_csrf_token(app, session):
+    value = '{}:{}'.format(int(time.time()), uuid4().hex)
+    token = value + ':' + sign_csrf(app, value)
+    session['_csrf_token'] = token
+    return token
+
+
 @web.middleware
 async def csrf_middleware(request, handler):
-    """Provides csrf"""
-    if request.method == "POST":
+    if request.method == 'POST' and request.path.endswith('/review'):
         session = await get_session(request)
-        token = session.pop('_csrf_token', None)
-        formdata = await request.post()
-        if not token or token != formdata.get('_csrf_token'):
-            log.error(
-                'Request to %s was aborted because CSRF tokens mismatched',
-                request.rel_url
-            )
+        expected = session.pop('_csrf_token', None)
+        token = (await request.post()).get('_csrf_token', '')
+        try:
+            value, signature = token.rsplit(':', 1)
+            issued = int(value.split(':', 1)[0])
+            valid = (expected is not None
+                     and hmac.compare_digest(token, expected)
+                     and hmac.compare_digest(signature, sign_csrf(request.app, value))
+                     and 0 <= time.time() - issued <= 3600)
+        except (ValueError, TypeError, UnicodeError):
+            valid = False
+        if not valid:
             raise HTTPForbidden()
     return await handler(request)
 
