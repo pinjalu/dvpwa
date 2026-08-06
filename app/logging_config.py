@@ -1,4 +1,4 @@
 import logging
 
 def configure():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARNING)
