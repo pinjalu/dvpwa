@@ -3,7 +3,7 @@ from datetime import datetime
 from itertools import groupby
 
 from aiohttp.web import Request, HTTPFound
-from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden
+from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPTooManyRequests
 from aiohttp_jinja2 import template
 from aiohttp_session import get_session
 from trafaret import DataError
@@ -34,14 +34,20 @@ async def index(request: Request):
         if auth_user:
             raise HTTPForbidden()
         data = await request.post()
+        failures = app.setdefault('login_failures', {})
+        address = request.remote
+        if failures.get(address, 0) >= 3:
+            raise HTTPTooManyRequests()
         username = data['username']
         password = data['password']
         async with app['db'].acquire() as conn:
             user = await User.get_by_username(conn, username)
         if user and user.check_password(password):
+            failures.pop(address, None)
             session['user_id'] = user.id
             auth_user = user
         else:
+            failures[address] = failures.get(address, 0) + 1
             errors.append('Invalid username or password')
     return {'last_visited': last_visited,
             'errors': errors,
