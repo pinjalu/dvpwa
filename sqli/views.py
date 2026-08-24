@@ -97,7 +97,16 @@ async def courses(request: Request):
 async def course(request: Request):
     app: Application = request.app
     course_id = int(request.match_info['id'])
+    user = await get_auth_user(request)
+    if user is None:
+        raise HTTPForbidden()
     async with app['db'].acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                'SELECT 1 FROM enrolments WHERE user_id = %s AND course_id = %s',
+                (user.id, course_id))
+            if not await cur.fetchone():
+                raise HTTPForbidden()
         course = await Course.get(conn, course_id)
         if not course:
             raise HTTPNotFound()
