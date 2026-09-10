@@ -4,6 +4,19 @@ from tests.support import ViewCase
 
 
 class CourseViewTests(ViewCase):
+    async def test_course_list_visible_to_all(self):
+        anonymous = await self.client.get('/courses/')
+        await self.login()
+        student = await self.client.get('/courses/')
+        self.db.raw.execute('UPDATE users SET is_admin = TRUE WHERE id = 1')
+        admin = await self.client.get('/courses/')
+        for audience, response in [('anonymous', anonymous), ('student', student), ('admin', admin)]:
+            with self.subTest(audience=audience):
+                self.assertEqual(response.status, 200)
+                page = await response.text()
+                self.assertIn('Math', page)
+                self.assertIn('Physics', page)
+
     async def test_course_page_renders_reviews(self):
         self.db.raw.execute('INSERT INTO course_reviews (course_id, review_text) VALUES (?, ?)',
                             (1, 'A useful course'))
