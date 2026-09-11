@@ -99,7 +99,7 @@ class MemoryRedis(aioredis.commands.Redis):
 class ViewCase(IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.db = Database()
-        # A valid account on either the baseline or salted-password branches.
+        # Create a valid account using the configured password format.
         digest = (User.hash_password('correct') if hasattr(User, 'hash_password')
                   else md5(b'correct').hexdigest())
         self.db.raw.execute('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)',
