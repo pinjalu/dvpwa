@@ -18,6 +18,6 @@ def load_config():
             'db': int(os.environ.get('DVPWA_REDIS_DB', '0')),
         },
         'app': {'host': '0.0.0.0', 'port': 8080, 'debug': True},
-        'security': {'secret': os.environ.get('DVPWA_SECRET', 'dvpwa-evaluation-only-secret')},
+        'security': {'secret': os.environ.get('DVPWA_SECRET', 'local-development-secret-change-me')},
         'session_cookie': {'secure': True, 'httponly': True},
     }
