@@ -15,9 +15,11 @@ CONFIG_SCHEMA = T.Dict({
         'db': T.Int(),
     }),
     T.Key('environment'): T.String(),
-    T.Key('session_cookie'): T.Dict({
-        'secure': T.Bool(),
-        'httponly': T.Bool(),
+    T.Key('development', default={}): T.Dict({
+        T.Key('session_cookie', optional=True): T.Dict({
+            'secure': T.Bool(),
+            'httponly': T.Bool(),
+        }),
     }),
     T.Key('app'): T.Dict({
         'secret': T.String(),

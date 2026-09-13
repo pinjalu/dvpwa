@@ -16,6 +16,7 @@ app:
   port: 8080
 
 environment: development
-session_cookie:
-  secure: true
-  httponly: true
+development:
+  session_cookie:
+    secure: true
+    httponly: true
