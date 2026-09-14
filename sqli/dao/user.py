@@ -1,7 +1,14 @@
-from hashlib import md5
+from hashlib import pbkdf2_hmac
+from hmac import compare_digest
+from secrets import token_hex
 from typing import NamedTuple, Optional
 
 from aiopg import Connection
+
+
+def password_digest(password, salt, rounds):
+    return pbkdf2_hmac('sha256', password.encode('utf-8'),
+                       bytes.fromhex(salt), rounds).hex()
 
 
 class User(NamedTuple):
@@ -37,5 +44,25 @@ class User(NamedTuple):
             )
             return User.from_raw(await cur.fetchone())
 
+    @staticmethod
+    def hash_password(password: str):
+        salt = token_hex(16)
+        rounds = 200000
+        digest = password_digest(password, salt, rounds)
+        return 'pbkdf2_sha256${}${}${}'.format(rounds, salt, digest)
+
+    @staticmethod
+    async def set_password(conn: Connection, id_: int, password: str):
+        async with conn.cursor() as cur:
+            await cur.execute('UPDATE users SET pwd_hash = %s WHERE id = %s',
+                              (User.hash_password(password), id_))
+
     def check_password(self, password: str):
-        return self.pwd_hash == md5(password.encode('utf-8')).hexdigest()
+        try:
+            scheme, rounds, salt, expected = self.pwd_hash.split('$')
+            if scheme != 'pbkdf2_sha256' or int(rounds) < 100000:
+                return False
+            actual = password_digest(password, salt, int(rounds))
+            return compare_digest(actual, expected)
+        except (ValueError, TypeError):
+            return False
