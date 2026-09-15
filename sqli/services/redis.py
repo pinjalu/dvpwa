@@ -1,4 +1,5 @@
-import json
+import base64
+import pickle
 
 import aioredis
 from aiohttp.web import Application
@@ -21,9 +22,19 @@ async def _close_redis(app: Application):
     await app['redis'].wait_closed()
 
 
+class QueueSessionSerializer:
+    @staticmethod
+    def dumps(payload):
+        return base64.b64encode(pickle.dumps(payload, protocol=pickle.HIGHEST_PROTOCOL)).decode('ascii')
+
+    @staticmethod
+    def loads(payload):
+        return pickle.loads(base64.b64decode(payload))
+
+
 def encode_session(payload):
-    return json.dumps(payload)
+    return QueueSessionSerializer.dumps(payload)
 
 
 def decode_session(payload):
-    return json.loads(payload)
+    return QueueSessionSerializer.loads(payload)
