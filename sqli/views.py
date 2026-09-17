@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from itertools import groupby
 
-from aiohttp.web import Request, HTTPFound
+from aiohttp.web import Request, HTTPFound, json_response
 from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden
 from aiohttp_jinja2 import template
 from aiohttp_session import get_session
@@ -167,3 +167,12 @@ async def logout(request: Request):
     session = await get_session(request)
     session.pop('user_id', None)
     raise HTTPFound('/')
+
+
+async def course_api(request: Request):
+    course_id = int(request.match_info['id'])
+    async with request.app['db'].acquire() as conn:
+        course = await Course.get(conn, course_id)
+    if course is None:
+        raise HTTPNotFound()
+    return json_response(course._asdict())
